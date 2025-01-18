@@ -1,22 +1,21 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, UseFormReturn } from 'react-hook-form';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage
 } from '@/components/ui/form';
-import * as Fade from '@/components/motion/fade';
-import { useTransition, useState, ReactNode } from 'react';
-import { getGifs } from './actions';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckIcon, CopyIcon, RefreshCcw } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
+import { ReactNode, useState, useTransition } from 'react';
+import { useForm, UseFormReturn } from 'react-hook-form';
+import * as z from 'zod';
+import { getGifs } from './actions';
 
 export const maxDuration = 60;
 
@@ -49,7 +48,13 @@ export default function Home() {
         {isPending ? (
           <Loading />
         ) : gifUrls.length > 0 ? (
-          <Results gifUrls={gifUrls} />
+          <Results
+            gifUrls={gifUrls}
+            resetForm={() => {
+              setGifUrls([]);
+              form.reset();
+            }}
+          />
         ) : (
           <GifForm form={form} onSubmit={onSubmit} />
         )}
@@ -73,7 +78,7 @@ function GifForm({
   onSubmit: (data: {
     description: string;
     youtubeUrl: string;
-  }) => Promise<void>;
+  }) => Promise<void> | void;
 }) {
   return (
     <motion.div
@@ -82,7 +87,7 @@ function GifForm({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -10, opacity: 0 }}
     >
-      <h1 className="text-2xl font-bold mb-6 text-gray-100">Create GIF</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-100">GIF anything</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
@@ -90,12 +95,8 @@ function GifForm({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>GIF Description</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Describe the GIF you want to create"
-                    {...field}
-                  />
+                  <Input placeholder="Describe your GIF" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -106,7 +107,6 @@ function GifForm({
             name="youtubeUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>YouTube URL</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter YouTube video URL" {...field} />
                 </FormControl>
@@ -130,25 +130,80 @@ function Loading() {
   return (
     <GridView
       nodes={[1, 2, 3, 4].map((i) => (
-        <div key={i} className="h-48 bg-gray-700 animate-pulse rounded-lg" />
+        <div
+          key={i}
+          className="h-full w-full bg-foreground/10 animate-pulse rounded-lg"
+        />
       ))}
     />
   );
 }
 
-function Results({ gifUrls }: { gifUrls: string[] }) {
+function Results({
+  gifUrls,
+  resetForm
+}: {
+  gifUrls: string[];
+  resetForm: () => void;
+}) {
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+
+  const copyToClipboard = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedUrl(url);
+      setTimeout(() => setCopiedUrl(null), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error('Failed to copy URL: ', err);
+    }
+  };
+
   return (
-    <GridView
-      nodes={gifUrls.map((url, i) => (
-        <div key={i} className="aspect-square overflow-hidden rounded-lg">
-          <img
-            src={url}
-            alt={`Generated GIF ${i + 1}`}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      ))}
-    />
+    <>
+      <GridView
+        nodes={gifUrls.map((url, i) => (
+          <div
+            key={i}
+            className="group relative aspect-square overflow-hidden rounded-lg"
+          >
+            <img
+              src={url}
+              alt={`Generated GIF ${i + 1}`}
+              className="w-full h-full object-cover"
+            />
+            <button
+              disabled={copiedUrl === url}
+              onClick={() => copyToClipboard(url)}
+              className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Copy to clipboard"
+            >
+              {copiedUrl === url ? (
+                <CheckIcon className="h-3 w-3" />
+              ) : (
+                <CopyIcon className="h-3 w-3" />
+              )}
+            </button>
+          </div>
+        ))}
+      />
+      <motion.div
+        className="max-w-xl w-full mx-auto flex flex-col mt-2"
+        initial={{ y: 5, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -10, opacity: 0 }}
+        transition={{
+          delay: 1
+        }}
+      >
+        <Button
+          className="self-end"
+          variant={'ghost'}
+          onClick={() => resetForm()}
+        >
+          Make another GIF <RefreshCcw className="w-4 h-4 ml-1" />
+        </Button>
+      </motion.div>
+    </>
   );
 }
 
