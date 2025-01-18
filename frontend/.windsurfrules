@@ -1,0 +1,4 @@
+This is an app to create dynamic gifs that perfectly match your search. The user inputs a 
+youtube url and a description of their gif, and receives gifs cut from the video.
+
+This app is built with NextJS, TailwindCSS, Shadcn, TypeScript, and Framer Motion.
