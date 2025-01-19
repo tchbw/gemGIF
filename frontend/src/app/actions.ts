@@ -19,6 +19,6 @@ export async function getGifs({
 
   await new Promise((resolve) => setTimeout(resolve, 8000));
   return {
-    gifUrls: ['/sig1.gif', '/sig2.gif', '/sig3.gif', '/sig4.gif']
+    gifUrls: ['/trump1.gif', '/trump2.gif', '/trump3.gif', '/trump4.gif']
   };
 }
