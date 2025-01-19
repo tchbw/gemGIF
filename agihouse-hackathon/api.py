@@ -1,7 +1,10 @@
+import sys
 import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, UploadFile
+
+sys.path.append(str(Path(__file__).parent))
 from main import download_video_from_url, generate_timecode_caption
 
 app = FastAPI()
@@ -23,7 +26,7 @@ async def generate_timecode_captions(url: str):
         captions = generate_timecode_caption(Path(video_path))
 
         try:
-            os.remove(video_path)
+            Path(video_path).unlink(missing_ok=True)
         except Exception as cleanup_error:
             print(f"Could not remove temporary video file: {cleanup_error}")
 
