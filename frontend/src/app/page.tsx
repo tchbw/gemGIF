@@ -42,6 +42,18 @@ export default function Home() {
     startTransition(async () => {
       const result = await getGifs(values);
       setGifUrls(result.gifUrls);
+
+      // try {
+      //   const result = await getGifs(values);
+      //   setGifUrls(result.gifUrls);
+      // } catch (err) {
+      //   setError(
+      //     err instanceof Error
+      //       ? err.message
+      //       : 'An error occurred while generating GIFs'
+      //   );
+      //   setGifUrls([]);
+      // }
     });
   }
 
