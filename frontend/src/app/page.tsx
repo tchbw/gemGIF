@@ -10,12 +10,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Lottie from 'lottie-react';
 import { CheckIcon, CopyIcon, RefreshCcw } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ReactNode, useState, useTransition } from 'react';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import * as z from 'zod';
 import { getGifs } from './actions';
+import animation from './animation.json';
+import animation2 from './animation2.json';
 
 export const maxDuration = 60;
 
@@ -44,7 +47,7 @@ export default function Home() {
 
   return (
     <AnimatePresence>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen h-1 py-12 px-4 sm:px-6 lg:px-8">
         {isPending ? (
           <Loading />
         ) : gifUrls.length > 0 ? (
@@ -80,49 +83,110 @@ function GifForm({
     youtubeUrl: string;
   }) => Promise<void> | void;
 }) {
+  const youtubeUrl = form.watch('youtubeUrl');
+  const getYoutubeVideoId = (url: string) => {
+    const regExp =
+      /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[7].length === 11 ? match[7] : null;
+  };
+
+  const videoId = youtubeUrl ? getYoutubeVideoId(youtubeUrl) : null;
+
   return (
-    <motion.div
-      className="max-w-md mx-auto rounded-lg shadow-lg p-6"
-      initial={{ y: 5, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: -10, opacity: 0 }}
-    >
-      <h1 className="text-2xl font-bold mb-6 text-gray-100">GIF anything</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input placeholder="Describe your GIF" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+    <>
+      <motion.div
+        className="absolute sm:left-[15%] sm:top-1/2 w-48 h-48"
+        initial={{ y: 5, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -10, opacity: 0 }}
+      >
+        <Lottie
+          animationData={animation}
+          loop
+          autoplay
+          width={100}
+          height={100}
+        />
+      </motion.div>
+      <motion.div
+        className="absolute sm:right-[13%] sm:top-1/2 w-48 h-48"
+        initial={{ y: 5, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -10, opacity: 0 }}
+      >
+        <Lottie
+          animationData={animation2}
+          loop
+          autoplay
+          width={100}
+          height={100}
+        />
+      </motion.div>
+      <motion.div
+        className="max-w-md mx-auto rounded-lg shadow-lg p-6 h-[80%] flex flex-col justify-center"
+        initial={{ y: 5, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -10, opacity: 0 }}
+      >
+        <h1 className="text-2xl font-bold mb-6 text-gray-100">GIF anything</h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Describe your GIF"
+                      {...field}
+                      autoComplete="off"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="youtubeUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter YouTube video URL"
+                      {...field}
+                      autoComplete="off"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#10a37f] hover:bg-[#1a7f64] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10a37f]"
+            >
+              Create GIF
+            </Button>
+            {youtubeUrl && videoId && (
+              <div className="mt-4">
+                <iframe
+                  width="100%"
+                  height="315"
+                  src={`https://www.youtube.com/embed/${videoId}`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             )}
-          />
-          <FormField
-            control={form.control}
-            name="youtubeUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input placeholder="Enter YouTube video URL" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#10a37f] hover:bg-[#1a7f64] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10a37f]"
-          >
-            Create GIF
-          </Button>
-        </form>
-      </Form>
-    </motion.div>
+          </form>
+        </Form>
+      </motion.div>
+    </>
   );
 }
 
