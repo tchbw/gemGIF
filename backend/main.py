@@ -6,10 +6,9 @@ from pydantic import BaseModel
 from typing import Dict, Any, Optional
 from mangum import Mangum
 import moviepy as mp
-import moviepy.config as mpc  # Added
+import moviepy.config as mpc 
 import boto3
-from urllib.parse import urlparse, parse_qs
-import tempfile  # Added
+import tempfile 
 
 # Environment variables or hard-coded bucket names
 VIDEO_S3_BUCKET = os.getenv("VIDEO_S3_BUCKET", "hackathon-agi-house-videos")
