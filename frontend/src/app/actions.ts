@@ -1,5 +1,7 @@
 'use server';
 
+import axios from 'axios';
+
 export async function getGifs({
   youtubeUrl,
   description
@@ -9,6 +11,12 @@ export async function getGifs({
 }): Promise<{
   gifUrls: string[];
 }> {
+  //   const response = await axios.post(`localhost:3001/gifs`, {
+  //     youtubeUrl,
+  //     description
+  //   });
+  //   return response.data;
+
   await new Promise((resolve) => setTimeout(resolve, 5000));
   return {
     gifUrls: [
