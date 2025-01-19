@@ -11,7 +11,7 @@ app = FastAPI()
 
 
 @app.post("/generate_timecode_captions/")
-async def generate_timecode_captions(url: str):
+async def generate_timecode_captions(url: str, user_query: str):
     try:
         # Create videos directory
         videos_dir = Path(__file__).parent / "videos"
@@ -23,7 +23,7 @@ async def generate_timecode_captions(url: str):
         )
 
         # Generate timecode captions
-        captions = generate_timecode_caption(Path(video_path))
+        captions = generate_timecode_caption(Path(video_path), user_query)
 
         try:
             Path(video_path).unlink(missing_ok=True)
@@ -41,7 +41,7 @@ async def generate_timecode_captions(url: str):
 
 
 @app.post("/uploadfile/")
-async def upload_video_file(file: UploadFile):
+async def upload_video_file(file: UploadFile, user_query: str):
     # Create videos directory
     videos_dir = Path(__file__).parent / "videos"
     videos_dir.mkdir(exist_ok=True)
@@ -55,7 +55,7 @@ async def upload_video_file(file: UploadFile):
             buffer.write(contents)
 
         # Process the file
-        captions = generate_timecode_caption(file_path)
+        captions = generate_timecode_caption(file_path, user_query)
 
         return {
             "filename": file.filename,

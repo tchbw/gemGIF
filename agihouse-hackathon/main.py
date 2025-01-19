@@ -38,21 +38,28 @@ def upload_video(video_file_name):
     return video_file
 
 
-def call_gemini_model(video):
+def call_gemini_model(video, user_query: str):
     model_name = "gemini-2.0-flash-exp"
-    prompt = """
-    Analyze the video and break it down into distinct scenes with precise timecodes.
+    prompt = f"""
+    Task: Select the Most Representative Video Scene for a GIF
 
-    For each scene, provide:
-    1. Start Time: Exact moment the scene begins (in MM:SS format)
-    2. End Time: Exact moment the scene concludes (in MM:SS format)
-    3. Caption: A concise, informative description of the scene's content
+    Creative Brief: {user_query}
 
-    Guidelines:
-    - Use strict MM:SS format (e.g., "00:08", "01:25")
-    - Ensure timecodes are sequential and accurate
-    - Capture the essence of each scene in the caption
-    """
+    Instructions:
+    - Find ONE scene that best captures the user's intent
+    - Select a 2-5 second segment with:
+      1. Clear, dynamic motion
+      2. Maximum visual impact
+      3. Direct alignment with the creative description
+
+    Output Format:
+    ```json
+    {{
+      "start_time": "MM:SS",
+      "end_time": "MM:SS",
+      "caption": "Funny GIF Caption"
+    }}
+    ```"""
 
     response = client.models.generate_content(
         model=model_name,
@@ -98,9 +105,11 @@ def convert_mmss_to_seconds(time_str: str) -> int:
     return minutes * 60 + seconds
 
 
-def generate_timecode_caption(video_file: Path) -> List[TimecodeCaption]:
+def generate_timecode_caption(
+    video_file: Path, user_query: str
+) -> List[TimecodeCaption]:
     uploaded_video = upload_video(video_file)
-    response = call_gemini_model(uploaded_video)
+    response = call_gemini_model(uploaded_video, user_query)
 
     try:
         captions = response.candidates[0].content.parts[0].text
