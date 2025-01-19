@@ -18,8 +18,8 @@ client = genai.Client(api_key=GOOGLE_API_KEY)
 
 
 class TimecodeCaption(BaseModel):
-    start_time: str
-    end_time: str
+    start_time: int
+    end_time: int
     caption: str
 
 
@@ -84,6 +84,20 @@ def call_gemini_model(video):
     return response
 
 
+def convert_mmss_to_seconds(time_str: str) -> int:
+    """
+    Convert MM:SS format to total seconds.
+
+    Args:
+        time_str (str): Time in MM:SS format (e.g., "01:25")
+
+    Returns:
+        int: Total number of seconds
+    """
+    minutes, seconds = map(int, time_str.split(":"))
+    return minutes * 60 + seconds
+
+
 def generate_timecode_caption(video_file: Path) -> List[TimecodeCaption]:
     uploaded_video = upload_video(video_file)
     response = call_gemini_model(uploaded_video)
@@ -91,7 +105,18 @@ def generate_timecode_caption(video_file: Path) -> List[TimecodeCaption]:
     try:
         captions = response.candidates[0].content.parts[0].text
         parsed_captions = json.loads(captions)
-        return [TimecodeCaption(**caption) for caption in parsed_captions]
+
+        # Convert MM:SS to seconds for start_time and end_time
+        converted_captions = []
+        for caption in parsed_captions:
+            converted_caption = {
+                "start_time": convert_mmss_to_seconds(caption["start_time"]),
+                "end_time": convert_mmss_to_seconds(caption["end_time"]),
+                "caption": caption["caption"],
+            }
+            converted_captions.append(TimecodeCaption(**converted_caption))
+
+        return converted_captions
     except Exception as e:
         print(f"Error parsing response: {e}")
         return []
