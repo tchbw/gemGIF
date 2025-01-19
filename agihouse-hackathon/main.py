@@ -41,24 +41,36 @@ def upload_video(video_file_name):
 def call_gemini_model(video, user_query: str):
     model_name = "gemini-2.0-flash-exp"
     prompt = f"""
-    Task: Select the Most Representative Video Scene for a GIF
+    Task: Generate Multiple Engaging GIF Scenes
 
     Creative Brief: {user_query}
 
-    Instructions:
-    - Find ONE scene that best captures the user's intent
-    - Select a 2-5 second segment with:
-      1. Clear, dynamic motion
-      2. Maximum visual impact
-      3. Direct alignment with the creative description
+    Scene Selection Guidelines:
+    - Identify 3-5 distinct scenes that comprehensively capture the user's intent
+    - Each scene should be a 2-5 second segment with:
+      1. Unique, dynamic visual moment
+      2. High entertainment or informative value
+      3. Clear alignment with the creative description
+
+    Output Requirements:
+    - Provide a JSON array of scene descriptions
+    - Ensure scenes are diverse and complementary
+    - Scenes should work well as individual GIFs
 
     Output Format:
     ```json
-    {{
-      "start_time": "MM:SS",
-      "end_time": "MM:SS",
-      "caption": "Funny GIF Caption"
-    }}
+    [
+      {{
+        "start_time": "MM:SS",
+        "end_time": "MM:SS",
+        "caption": "Descriptive GIF scene explanation"
+      }},
+      {{
+        "start_time": "MM:SS",
+        "end_time": "MM:SS",
+        "caption": "Another unique scene description"
+      }}
+    ]
     ```"""
 
     response = client.models.generate_content(
